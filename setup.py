@@ -28,8 +28,6 @@ setup(
         "Development Status :: 7 - Inactive",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
@@ -38,7 +36,7 @@ setup(
         'six',
     ),
     tests_require=(
-        'nose>=1.0',
+        'nose2',
         'coverage',
     ),
     zip_safe=True,

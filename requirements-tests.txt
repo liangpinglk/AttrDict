@@ -1,4 +1,4 @@
 coverage
 flake8
-nose
+nose2
 python-coveralls

@@ -1,69 +1,76 @@
 """
 Tests for the AttrDefault class.
 """
-from nose.tools import assert_equals, assert_raises
+import unittest
+
+import nose2
 
 
-def test_invalid_attributes():
-    """
-    Tests how set/delattr handle invalid attributes.
-    """
-    from attrdict.mapping import AttrMap
+class TestMixins(unittest.TestCase):
 
-    mapping = AttrMap()
-
-    # mapping currently has allow_invalid_attributes set to False
-    def assign():
+    def test_invalid_attributes(self):
         """
-        Assign to an invalid attribute.
+        Tests how set/delattr handle invalid attributes.
         """
-        mapping._key = 'value'
+        from attrdict.mapping import AttrMap
 
-    assert_raises(TypeError, assign)
-    assert_raises(AttributeError, lambda: mapping._key)
-    assert_equals(mapping, {})
+        mapping = AttrMap()
 
-    mapping._setattr('_allow_invalid_attributes', True)
+        # mapping currently has allow_invalid_attributes set to False
+        def assign():
+            """
+            Assign to an invalid attribute.
+            """
+            mapping._key = 'value'
 
-    assign()
-    assert_equals(mapping._key, 'value')
-    assert_equals(mapping, {})
+        self.assertRaises(TypeError, assign)
+        self.assertRaises(AttributeError, lambda: mapping._key)
+        self.assertEqual(mapping, {})
 
-    # delete the attribute
-    def delete():
+        mapping._setattr('_allow_invalid_attributes', True)
+
+        assign()
+        self.assertEqual(mapping._key, 'value')
+        self.assertEqual(mapping, {})
+
+        # delete the attribute
+        def delete():
+            """
+            Delete an invalid attribute.
+            """
+            del mapping._key
+
+        delete()
+        self.assertRaises(AttributeError, lambda: mapping._key)
+        self.assertEqual(mapping, {})
+
+        # now with disallowing invalid
+        assign()
+        mapping._setattr('_allow_invalid_attributes', False)
+
+        self.assertRaises(TypeError, delete)
+        self.assertEqual(mapping._key, 'value')
+        self.assertEqual(mapping, {})
+
+        # force delete
+        mapping._delattr('_key')
+        self.assertRaises(AttributeError, lambda: mapping._key)
+        self.assertEqual(mapping, {})
+
+    def test_constructor(self):
         """
-        Delete an invalid attribute.
+        _constructor MUST be implemented.
         """
-        del mapping._key
+        from attrdict.mixins import Attr
 
-    delete()
-    assert_raises(AttributeError, lambda: mapping._key)
-    assert_equals(mapping, {})
+        class AttrImpl(Attr):
+            """
+            An implementation of attr that doesn't implement _constructor.
+            """
+            pass
 
-    # now with disallowing invalid
-    assign()
-    mapping._setattr('_allow_invalid_attributes', False)
-
-    assert_raises(TypeError, delete)
-    assert_equals(mapping._key, 'value')
-    assert_equals(mapping, {})
-
-    # force delete
-    mapping._delattr('_key')
-    assert_raises(AttributeError, lambda: mapping._key)
-    assert_equals(mapping, {})
+        self.assertRaises(NotImplementedError, lambda: AttrImpl._constructor({}, ()))
 
 
-def test_constructor():
-    """
-    _constructor MUST be implemented.
-    """
-    from attrdict.mixins import Attr
-
-    class AttrImpl(Attr):
-        """
-        An implementation of attr that doesn't implement _constructor.
-        """
-        pass
-
-    assert_raises(NotImplementedError, lambda: AttrImpl._constructor({}, ()))
+if __name__ == '__main__':
+    nose2.main()
